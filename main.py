@@ -1,4 +1,4 @@
-# Inicia servidor con: uvicorp main:app --reload
+# Inicia servidor con: uvicorn main:app --reload
 # Detener el server: Ctrl + C
 
 # Documentacion con Swagger: http://127.0.0.1:8000/docs
