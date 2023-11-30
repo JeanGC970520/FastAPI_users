@@ -35,15 +35,57 @@ async def usersClass():
 async def users():
     return usersFakeDB
 
-# Usando Path parameters.
+# Usando Path parameters. Se usan cuando un parametro es obligatorio
 @app.get("/user/{id}")
 async def userById(id: int):
     return searchUser(id)
     
-# Usando Query parameters.
+# Usando Query parameters. Se uasan cuando los parametros pueden ser opcionales, como la paginacion
 @app.get("/userquery/")
 async def userQuery(id: int):
     return searchUser(id)
+
+# * Nota: Se suelen usar Path parameters cuando dicho parametro es necesario para hacer la consulta.
+# *       En cambio se usan los Query parameters cuando no es necesario para hacer la consulta.
+
+# POST
+@app.post("/user/")
+async def createUser(user: User):
+    if type(searchUser(user.id)) == User:
+        return {"error": "User exist"}
+
+    # Insertando User en DB
+    usersFakeDB.append(user)
+    return user
+
+# PUT
+@app.put("/user/")
+async def updateUser(user: User):
+    found = False
+
+    for index, savedUser in enumerate(usersFakeDB):
+        if savedUser.id == user.id:
+            usersFakeDB[index] = user
+            found = True
+            break 
+    
+    if not found:
+        return {"error": "The user has not been updated"}
+    return user
+
+# DELETE
+@app.delete("/user/{id}")
+async def deleteUser(id: int):
+    found = False
+
+    for index, savedUser in enumerate(usersFakeDB):
+        if savedUser.id == id:
+            del usersFakeDB[index]
+            found = True
+            break 
+
+    if not found:
+        return {"error": "Not found. The user has not been deleted"}
     
 def searchUser(id: int):
     users = filter(lambda user: user.id == id, usersFakeDB)
