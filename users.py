@@ -1,7 +1,7 @@
 # Inicia servidor con: uvicorn users:app --reload
 # Detener el server: Ctrl + C
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -49,10 +49,13 @@ async def userQuery(id: int):
 # *       En cambio se usan los Query parameters cuando no es necesario para hacer la consulta.
 
 # POST
-@app.post("/user/")
+# Returning 201 HTTP code when all gone fine
+# Tambien podemos indicar que tipo de respuesta es la que se espera devuelva cuando todo va bien.
+@app.post("/user/", response_model=User, status_code=201) 
 async def createUser(user: User):
     if type(searchUser(user.id)) == User:
-        return {"error": "User exist"}
+        # ! Cuando algo va mal es mas comun regresar un status code. En este caso con HTTPException y raise.
+        raise HTTPException(status_code=309, detail="User exist")
 
     # Insertando User en DB
     usersFakeDB.append(user)
