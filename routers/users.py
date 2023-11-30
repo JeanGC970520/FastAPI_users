@@ -1,10 +1,12 @@
 # Inicia servidor con: uvicorn users:app --reload
 # Detener el server: Ctrl + C
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+router = APIRouter(
+    tags=["Users"]  # * Los tags nos sirven para "etiquetar"(agrupar) el router y sus operaciones, Ver docs.
+)
 
 # Entidad user
 
@@ -20,28 +22,28 @@ usersFakeDB = [ User(id= 1,name="Jean", surname="Garcia", url="https://jeangacia
                 User(id= 2,name="James", surname="Garcia", url="https://jamesgacia.com", age=16),
                 User(id= 3,name="Alfredo", surname="Garcia", url="https://alfredogacia.com", age=58),]
 
-@app.get("/usersjson")
+@router.get("/usersjson")
 async def usersJson():
     return [{"name" : "Jean", "surname" : "Garcia", "url" : "https://jeangacia.com", "age" : 26},
             {"name" : "James", "surname" : "Garcia", "url" : "https://jamesgacia.com", "age" : 16},
             {"name" : "Alfredo", "surname" : "Garcia", "url" : "https://alfredogacia.com", "age" : 58},]
 
 
-@app.get("/usersclass")
+@router.get("/usersclass")
 async def usersClass():
     return User(name="Jean", surname="Garcia", url="https://jeangacia.com", age=26)
 
-@app.get("/users")
+@router.get("/users")
 async def users():
     return usersFakeDB
 
 # Usando Path parameters. Se usan cuando un parametro es obligatorio
-@app.get("/user/{id}")
+@router.get("/user/{id}")
 async def userById(id: int):
     return searchUser(id)
     
 # Usando Query parameters. Se uasan cuando los parametros pueden ser opcionales, como la paginacion
-@app.get("/userquery/")
+@router.get("/userquery/")
 async def userQuery(id: int):
     return searchUser(id)
 
@@ -51,7 +53,7 @@ async def userQuery(id: int):
 # POST
 # Returning 201 HTTP code when all gone fine
 # Tambien podemos indicar que tipo de respuesta es la que se espera devuelva cuando todo va bien.
-@app.post("/user/", response_model=User, status_code=201) 
+@router.post("/user/", response_model=User, status_code=201) 
 async def createUser(user: User):
     if type(searchUser(user.id)) == User:
         # ! Cuando algo va mal es mas comun regresar un status code. En este caso con HTTPException y raise.
@@ -62,7 +64,7 @@ async def createUser(user: User):
     return user
 
 # PUT
-@app.put("/user/")
+@router.put("/user/")
 async def updateUser(user: User):
     found = False
 
@@ -77,7 +79,7 @@ async def updateUser(user: User):
     return user
 
 # DELETE
-@app.delete("/user/{id}")
+@router.delete("/user/{id}")
 async def deleteUser(id: int):
     found = False
 
