@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
@@ -12,7 +12,7 @@ ACCESS_TOKEN_DURATION = 1   # El Token seria valido por un tiempo de un minuto
 # Clave de encriptacion, semilla. Esto hace muy seguro el token ya que esta KEY_SECRET, solo la conoce el Backend
 SECRET = "2c18e6da13c483c3e2707327c5a183e691a9a2734588fd2a54a2c979365b17d6A"
 
-app = FastAPI()
+router = APIRouter()
 
 # tockenUrl es el URL de donde se obtendra el OAuht2 token
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
@@ -87,7 +87,7 @@ async def currentUser(user: User = Depends(authUser)):
 
 # * Con Depends() significa que esta operacion va a recibir datos pero NO depende de nadie
 # * Si a Depends(criterio) le pasamos un criterio, entonces va a depender de ese criterio.
-@app.post("/login")
+@router.post("/login")
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     userDB = usersDBFake.get(form.username)
     if not userDB:
@@ -113,7 +113,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
 # !     -- Explicacion: Al depender de currentUser(), primero se debe resover lo que hay dentro 
 # !             de ese metodo. Pero como a su vez éste deoende de authUser(), debe resolver ese
 # !             otro metodo antes. Éste a su vez depende de oauth2.
-@app.get("/users/me")
+@router.get("/users/me")
 async def me(user: User = Depends(currentUser)):
     return user
 

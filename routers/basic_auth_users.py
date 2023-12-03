@@ -1,10 +1,10 @@
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
-app = FastAPI()
+router = APIRouter()
 
 # tockenUrl es el URL de donde se obtendra el OAuht2 token
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
@@ -66,7 +66,7 @@ async def currentUser(token: str = Depends(oauth2)):
 
 # * Con Depends() significa que esta operacion va a recibir datos pero NO depende de nadie
 # * Si a Depends(criterio) le pasamos un criterio, entonces va a depender de ese criterio.
-@app.post("/login")
+@router.post("/login")
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     userDB = usersDB.get(form.username)
     if not userDB:
@@ -81,6 +81,6 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     return {"acces_token" : user.username, "token_type": "bearer" }
 
 # * Depends() en este caso hace que tengamos un User si currentUser termina bien. Depende de currentUser 
-@app.get("/users/me")
+@router.get("/users/me")
 async def me(user: User = Depends(currentUser)):
     return user
