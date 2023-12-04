@@ -1,18 +1,19 @@
 
 # Users API con MongoDB
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from db.models.user import User
+from db.client import dbClient
+from db.schemas.user import userSchema
 
 router = APIRouter(
     prefix="/userdb", 
     tags=["UsersDB"],                              # * Los tags nos sirven para "etiquetar"(agreupar) el router y sus operaciones, Ver docs.
-    responses={404 : {"message": "No encontrado"}} # * Agrega posibles respuestas custom.
+    responses={status.HTTP_404_NOT_FOUND : {"message": "No encontrado"}} # * Agrega posibles respuestas custom.
 )
 
 # Simulando que es una DB.
 usersFakeDB = []
-
 
 @router.get("/")
 async def users():
@@ -34,15 +35,22 @@ async def userQuery(id: int):
 # POST
 # Returning 201 HTTP code when all gone fine
 # Tambien podemos indicar que tipo de respuesta es la que se espera devuelva cuando todo va bien.
-@router.post("/", response_model=User, status_code=201) 
+@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED) 
 async def createUser(user: User):
-    if type(searchUser(user.id)) == User:
+    if type(searchUserByEmial(user.email)) == User:
         # ! Cuando algo va mal es mas comun regresar un status code. En este caso con HTTPException y raise.
-        raise HTTPException(status_code=309, detail="User exist")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User exist")
 
     # Insertando User en DB
-    usersFakeDB.append(user)
-    return user
+    userDict = dict(user)
+    del userDict["id"]      # Borrando campo "id" para que MongoDB lo incerte
+    _id = dbClient.local.users.insert_one(userDict).inserted_id
+    # Consulando usuario que acabamos de insertar. El campo de identificacion unica en MongoDB, se llama "_id"
+    newUser = dbClient.local.users.find_one({"_id": _id})   # newUser es un objeto de base de datos
+
+    newUser = userSchema(newUser)
+
+    return User(**newUser)
 
 # PUT
 @router.put("/")
@@ -73,9 +81,12 @@ async def deleteUser(id: int):
     if not found:
         return {"error": "Not found. The user has not been deleted"}
     
-def searchUser(id: int):
-    users = filter(lambda user: user.id == id, usersFakeDB)
+def searchUserByEmial(email: str):
     try:
-        return list(users)[0] 
+        user = dbClient.local.users.find_one({"email": email}) 
+        return User(**userSchema(user))
     except:
         return {"error": "Not Found"}
+    
+def searchUser(id: int):
+    return ""
