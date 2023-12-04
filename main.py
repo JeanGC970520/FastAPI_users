@@ -5,7 +5,7 @@
 # Documentacion con Redocly: http://127.0.0.1:8000/redoc
 
 from fastapi import FastAPI
-from routers import products, users, basic_auth_users, jwt_auth_users
+from routers import products, users, basic_auth_users, jwt_auth_users, users_db
 from fastapi.staticfiles import StaticFiles
  
 app = FastAPI()
@@ -21,6 +21,8 @@ app.include_router(users.router)
 app.include_router(basic_auth_users.router)
 
 app.include_router(jwt_auth_users.router)
+
+app.include_router(users_db.router)
 
 # * Exponiendo recursos ESTATICOS. Tales como imagenes, PDF's, etc.
 # El primer parametro, llamado path, corresponde al path raiz que se ocupara para acceder al recurso
