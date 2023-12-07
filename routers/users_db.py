@@ -19,7 +19,7 @@ usersFakeDB = []
 
 @router.get("/", response_model=list[User])
 async def users():
-    return usersSchema(dbClient.local.users.find())
+    return usersSchema(dbClient.users.find())
 
 # Usando Path parameters. Se usan cuando un parametro es obligatorio
 @router.get("/{id}")
@@ -47,9 +47,9 @@ async def createUser(user: User):
     # Insertando User en DB
     userDict = dict(user)
     del userDict["id"]      # Borrando campo "id" para que MongoDB lo incerte
-    _id = dbClient.local.users.insert_one(userDict).inserted_id
+    _id = dbClient.users.insert_one(userDict).inserted_id
     # Consulando usuario que acabamos de insertar. El campo de identificacion unica en MongoDB, se llama "_id"
-    newUser = dbClient.local.users.find_one({"_id": _id})   # newUser es un objeto de base de datos
+    newUser = dbClient.users.find_one({"_id": _id})   # newUser es un objeto de base de datos
 
     newUser = userSchema(newUser)
 
@@ -63,7 +63,7 @@ async def updateUser(user: User):
     del userDict["id"]
 
     try:
-        dbClient.local.users.find_one_and_replace({"_id": ObjectId(user.id)}, userDict)
+        dbClient.users.find_one_and_replace({"_id": ObjectId(user.id)}, userDict)
     except:
         return {"error": "The user has not been updated"}
 
@@ -73,14 +73,14 @@ async def updateUser(user: User):
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deleteUser(id: str):
 
-    found = dbClient.local.users.find_one_and_delete({"_id": ObjectId(id)})
+    found = dbClient.users.find_one_and_delete({"_id": ObjectId(id)})
 
     if not found:
         return {"error": "Not found. The user has not been deleted"}
     
 def searchUser(field: str, key):
     try:
-        user = dbClient.local.users.find_one({field: key}) 
+        user = dbClient.users.find_one({field: key}) 
         return User(**userSchema(user))
     except:
         return {"error": "Not Found"}

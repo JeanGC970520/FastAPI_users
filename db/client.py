@@ -5,7 +5,7 @@
 
 from pymongo import MongoClient
 
-dbClient = MongoClient()
+dbClient = MongoClient().local
 
 
 
