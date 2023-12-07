@@ -6,3 +6,6 @@ def userSchema(user) -> dict:
         "email": user["email"],
     }
 
+
+def usersSchema(users) -> list:
+    return [ userSchema(user) for user in users ]
