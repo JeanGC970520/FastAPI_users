@@ -5,7 +5,11 @@
 
 from pymongo import MongoClient
 
-dbClient = MongoClient().local
+# Conexion a la DB local
+#dbClient = MongoClient().local
+
+# Conexion a la DB remota
+dbClient = MongoClient("mongodb+srv://test:test@cluster0.qdkdt1w.mongodb.net/?retryWrites=true&w=majority").test
 
 
 
