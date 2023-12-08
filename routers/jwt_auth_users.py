@@ -12,7 +12,12 @@ ACCESS_TOKEN_DURATION = 1   # El Token seria valido por un tiempo de un minuto
 # Clave de encriptacion, semilla. Esto hace muy seguro el token ya que esta KEY_SECRET, solo la conoce el Backend
 SECRET = "2c18e6da13c483c3e2707327c5a183e691a9a2734588fd2a54a2c979365b17d6A"
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/jwtauth", 
+    tags=["JWTAuth"],                              # * Los tags nos sirven para "etiquetar"(agreupar) el router y sus operaciones, Ver docs.
+    responses={status.HTTP_404_NOT_FOUND : {"message": "No encontrado"}} # * Agrega posibles respuestas custom.
+)
+
 
 # tockenUrl es el URL de donde se obtendra el OAuht2 token
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
